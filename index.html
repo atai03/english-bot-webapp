@@ -1,57 +1,511 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>English Trainer</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Английский тренажёр</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .card {
-      background: #1e293b;
-      padding: 30px;
-      border-radius: 16px;
-      text-align: center;
-      width: 280px;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    button {
-      margin-top: 20px;
-      padding: 12px 20px;
-      border-radius: 12px;
-      border: none;
-      background: #38bdf8;
-      color: black;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .stats {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .card {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .level {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .word {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .english-word {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .transcription {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .translation {
+            font-size: 20px;
+            color: #4a5568;
+            min-height: 28px;
+            margin-bottom: 30px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-know {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-dont-know {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-show {
+            background: #4299e1;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-next {
+            background: #9f7aea;
+            color: white;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .examples {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .examples h3 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .example {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .example:last-child {
+            margin-bottom: 0;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: #48bb78;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #48bb78;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 English Trainer</h1>
+            <p>Учи английский эффективно</p>
+        </div>
 
-<div class="card">
-  <h2 id="word">include</h2>
-  <p id="translation" style="display:none;">включать</p>
-  <button onclick="show()">Показать перевод</button>
-</div>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalWords">0</div>
+                <div class="stat-label">Слов изучено</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="streak">0</div>
+                <div class="stat-label">Дней подряд</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="correctRate">0%</div>
+                <div class="stat-label">Правильно</div>
+            </div>
+        </div>
 
-<script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
+        <div class="progress-bar">
+            <div class="progress" id="lessonProgress"></div>
+        </div>
 
-  function show() {
-    document.getElementById("translation").style.display = "block";
-  }
-</script>
+        <div class="card">
+            <div class="card-header">
+                <span>Карточка #<span id="cardNumber">1</span></span>
+                <span class="level" id="level">Начальный</span>
+            </div>
 
+            <div class="word">
+                <div class="english-word" id="englishWord">include</div>
+                <div class="transcription" id="transcription">/ɪnˈkluːd/</div>
+                <div class="translation" id="translation">...</div>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-know" id="knowBtn" onclick="knowWord()">✅ Знаю</button>
+                <button class="btn btn-dont-know" id="dontKnowBtn" onclick="dontKnowWord()">❌ Не знаю</button>
+            </div>
+
+            <button class="btn btn-show" id="showBtn" onclick="showTranslation()">Показать перевод</button>
+            <button class="btn btn-next hidden" id="nextBtn" onclick="nextWord()">Следующее слово →</button>
+
+            <div class="examples hidden" id="examples">
+                <h3>Примеры использования:</h3>
+                <div class="example" id="example1">The price includes breakfast.</div>
+                <div class="example" id="example2">Does the tour include museum visits?</div>
+            </div>
+        </div>
+
+        <div class="notification" id="notification">Отлично! +10 очков</div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Раскрываем на весь экран
+        tg.ready();
+
+        // База слов с примерами
+        const words = [
+            {
+                en: "include",
+                ru: "включать, содержать",
+                transcription: "/ɪnˈkluːd/",
+                examples: [
+                    "The price includes breakfast.",
+                    "Does the tour include museum visits?",
+                    "Please include your contact details."
+                ],
+                level: "beginner"
+            },
+            {
+                en: "achieve",
+                ru: "достигать, добиваться",
+                transcription: "/əˈtʃiːv/",
+                examples: [
+                    "She achieved her goal of becoming a doctor.",
+                    "We need to achieve better results.",
+                    "Hard work helps achieve success."
+                ],
+                level: "intermediate"
+            },
+            {
+                en: "consider",
+                ru: "рассматривать, считать",
+                transcription: "/kənˈsɪdər/",
+                examples: [
+                    "We need to consider all options.",
+                    "He is considered an expert.",
+                    "Consider the consequences carefully."
+                ],
+                level: "intermediate"
+            },
+            {
+                en: "develop",
+                ru: "развивать, разрабатывать",
+                transcription: "/dɪˈveləp/",
+                examples: [
+                    "Children develop quickly.",
+                    "We're developing a new app.",
+                    "The company continues to develop."
+                ],
+                level: "beginner"
+            },
+            {
+                en: "require",
+                ru: "требовать, нуждаться",
+                transcription: "/rɪˈkwaɪər/",
+                examples: [
+                    "This job requires experience.",
+                    "The situation requires immediate action.",
+                    "Do you require any assistance?"
+                ],
+                level: "intermediate"
+            }
+        ];
+
+        // Состояние пользователя
+        let currentWordIndex = 0;
+        let totalWordsLearned = 0;
+        let streak = 1;
+        let correctAnswers = 0;
+        let totalAnswers = 0;
+
+        // Элементы интерфейса
+        const englishWordEl = document.getElementById('englishWord');
+        const transcriptionEl = document.getElementById('transcription');
+        const translationEl = document.getElementById('translation');
+        const examplesEl = document.getElementById('examples');
+        const example1El = document.getElementById('example1');
+        const example2El = document.getElementById('example2');
+        const showBtn = document.getElementById('showBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const knowBtn = document.getElementById('knowBtn');
+        const dontKnowBtn = document.getElementById('dontKnowBtn');
+        const cardNumberEl = document.getElementById('cardNumber');
+        const levelEl = document.getElementById('level');
+        const totalWordsEl = document.getElementById('totalWords');
+        const streakEl = document.getElementById('streak');
+        const correctRateEl = document.getElementById('correctRate');
+        const lessonProgressEl = document.getElementById('lessonProgress');
+        const notificationEl = document.getElementById('notification');
+
+        // Загрузка прогресса из localStorage
+        function loadProgress() {
+            const saved = localStorage.getItem('englishTrainerProgress');
+            if (saved) {
+                const progress = JSON.parse(saved);
+                totalWordsLearned = progress.totalWordsLearned || 0;
+                streak = progress.streak || 1;
+                correctAnswers = progress.correctAnswers || 0;
+                totalAnswers = progress.totalAnswers || 0;
+                updateStats();
+            }
+        }
+
+        // Сохранение прогресса в localStorage
+        function saveProgress() {
+            const progress = {
+                totalWordsLearned,
+                streak,
+                correctAnswers,
+                totalAnswers,
+                lastStudyDate: new Date().toISOString()
+            };
+            localStorage.setItem('englishTrainerProgress', JSON.stringify(progress));
+        }
+
+        // Обновление статистики
+        function updateStats() {
+            totalWordsEl.textContent = totalWordsLearned;
+            streakEl.textContent = streak;
+            const rate = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+            correctRateEl.textContent = `${rate}%`;
+
+            // Прогресс урока
+            const progress = ((currentWordIndex + 1) / words.length) * 100;
+            lessonProgressEl.style.width = `${progress}%`;
+        }
+
+        // Показ уведомления
+        function showNotification(text) {
+            notificationEl.textContent = text;
+            notificationEl.classList.add('show');
+            setTimeout(() => {
+                notificationEl.classList.remove('show');
+            }, 2000);
+        }
+
+        // Отображение текущего слова
+        function displayWord() {
+            const word = words[currentWordIndex];
+
+            englishWordEl.textContent = word.en;
+            transcriptionEl.textContent = word.transcription;
+            translationEl.textContent = '...';
+            levelEl.textContent = word.level === 'beginner' ? 'Начальный' : 'Средний';
+            cardNumberEl.textContent = currentWordIndex + 1;
+
+            // Примеры
+            if (word.examples && word.examples.length >= 2) {
+                example1El.textContent = word.examples[0];
+                example2El.textContent = word.examples[1];
+            }
+
+            // Скрываем кнопки
+            showBtn.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+            examplesEl.classList.add('hidden');
+            translationEl.style.color = '#4a5568';
+
+            updateStats();
+        }
+
+        // Показать перевод
+        function showTranslation() {
+            const word = words[currentWordIndex];
+            translationEl.textContent = word.ru;
+            translationEl.style.color = '#2d3748';
+            examplesEl.classList.remove('hidden');
+            showBtn.classList.add('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        // Пользователь знает слово
+        function knowWord() {
+            totalAnswers++;
+            correctAnswers++;
+            totalWordsLearned++;
+
+            showNotification('Отлично! +10 очков');
+            showTranslation();
+            saveProgress();
+        }
+
+        // Пользователь не знает слово
+        function dontKnowWord() {
+            totalAnswers++;
+            totalWordsLearned++;
+
+            showNotification('Изучите это слово внимательнее');
+            showTranslation();
+            saveProgress();
+        }
+
+        // Следующее слово
+        function nextWord() {
+            currentWordIndex = (currentWordIndex + 1) % words.length;
+            displayWord();
+
+            // Если прошли все слова
+            if (currentWordIndex === 0) {
+                showNotification('🎉 Вы прошли все слова! Начинаем заново.');
+                streak++;
+                saveProgress();
+            }
+        }
+
+        // Инициализация
+        loadProgress();
+        displayWord();
+
+        // Отправка данных в бота (когда понадобится)
+        function sendDataToBot() {
+            const data = {
+                action: 'update_progress',
+                progress: {
+                    totalWordsLearned,
+                    streak,
+                    correctRate: totalAnswers > 0 ? (correctAnswers / totalAnswers) * 100 : 0
+                }
+            };
+            tg.sendData(JSON.stringify(data));
+        }
+
+        // Можно вызвать sendDataToBot() при закрытии или по кнопке
+    </script>
 </body>
 </html>
